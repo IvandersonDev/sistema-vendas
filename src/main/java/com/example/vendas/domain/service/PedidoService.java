@@ -6,6 +6,7 @@ import com.example.vendas.domain.model.*;
 import com.example.vendas.domain.repository.ClienteRepository;
 import com.example.vendas.domain.repository.PedidoRepository;
 import com.example.vendas.domain.repository.ProdutoRepository;
+import com.example.vendas.messaging.PedidoEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
+    private final PedidoEventPublisher eventPublisher;
 
     public Pedido buscar(Long id) {
         return pedidoRepository.findById(id)
@@ -72,6 +74,7 @@ public class PedidoService {
 
         pedido.setTotal(total);
         Pedido salvo = pedidoRepository.save(pedido);
+        eventPublisher.publishAfterCommit("PEDIDO_CRIADO", salvo);
         return salvo;
     }
 
@@ -81,6 +84,7 @@ public class PedidoService {
         if (pedido.getStatus() == PedidoStatus.CRIADO) {
             pedido.setStatus(PedidoStatus.PAGO);
         }
+        eventPublisher.publishAfterCommit("PEDIDO_PAGO", pedido);
         return pedido;
     }
 
@@ -95,7 +99,7 @@ public class PedidoService {
             }
             pedido.setStatus(PedidoStatus.CANCELADO);
         }
+        eventPublisher.publishAfterCommit("PEDIDO_CANCELADO", pedido);
         return pedido;
     }
 }
-

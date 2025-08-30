@@ -16,6 +16,15 @@ spring:
   h2:
     console:
       enabled: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    listener:
+      missing-topics-fatal: false
 
 server:
   port: 8080
@@ -39,4 +48,3 @@ flyway:
 logging:
   level:
     org.springframework.security: INFO
-
